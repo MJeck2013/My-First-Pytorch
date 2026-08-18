@@ -31,6 +31,7 @@ def ai():
 user = st.chat_input(f"Talk to {ai_name}: ")
 if user:
     default = False
+    Error = False
     ai_nums = ai()
     
     ai_intro = str(ai_nums).replace("1", "Hi!").replace("2", "Hello!").replace("3", "key1")
