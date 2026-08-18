@@ -1,4 +1,5 @@
 import streamlit as st
+
 try:
     import math
     import ast
@@ -31,19 +32,25 @@ try:
             if ai_num in [1, 2, 3]:
                 break
         return ai_num
+
     st.title(f"Chat with {ai_name}")
     user = st.chat_input(f"Talk to {ai_name}")
+
     if user:
         default = False
         Error = False
         ai_nums = ai()
         ai_intro = str(ai_nums).replace("1", "Hi!").replace("2", "Hello!").replace("3", "key1")
         name = ""
+
         if os.path.exists("name.py"):
             with open("name.py", "r") as file:
                 name = file.read().strip()
-        with open("history.py", "r") as f:
-            history = f.read()
+
+        history = ""
+        if os.path.exists("history.py"):
+            with open("history.py", "r") as f:
+                history = f.read()
     
         if ai_intro == "key1":
             ai_intro = f"Hello {name}!" if name else "Hello!"
@@ -51,8 +58,8 @@ try:
         question = "?" in user
         ai_main = ""
     
-        # Check for prompt commands safely
         user_clean = user.lower().replace("'", "")
+
         if "what can you do" in user_clean:
             ai_main = "I can answer questions, inform you on things, and research stuff for you!"
             default = True
@@ -71,7 +78,7 @@ try:
             try:
                 node = ast.parse(used_text.strip(), mode='eval')
                 Answer = eval(compile(node, '<string>', 'eval'), {"__builtins__": None, "math": math}, {})
-            except:
+            except Exception:
                 Error = True
                 Answer = ""
             name_str = f"{name} i" if name else "I"
@@ -90,7 +97,7 @@ try:
                     2: f"I feel bad for you just know you got someone in your corner{name_str}.",
                     3: f"Its alright things'll get better{name_str}."
                 }
-                ai_main = options.get(ai_nums, f"")
+                ai_main = options.get(ai_nums, f"Its alright things'll get better{name_str}.")
                 default = True
             elif any(word in user_clean for word in ["happy", "excited", "energetic", "joy", "good", "well", "nice"]):
                 options = {
@@ -113,10 +120,12 @@ try:
             elif "died" in user_clean:
                 ai_main = f"I am so sorry for your loss{name_str}."
                 default = True
-            if any(word in user_clean for word in ["how about you", "how are you", "you doing", "how about you"]):
-                    ai_main = ai_main + " And I am doing well today, thank you for asking!"
-        if any(word in user_clean for word in ["my name", "i am", "name is"]):
-            match = re.search(r"(?:my name is|call me|my name|hello|people call me|well|s)\s+([a-zA-Z]+)", user_clean.replace("!", "").replace(".", "").replace("?", ""), re.IGNORECASE)
+
+            if any(phrase in user_clean for phrase in ["how about you", "how are you", "you doing"]):
+                ai_main = ai_main + " And I am doing well today, thank you for asking!"
+
+        if any(word in user_clean for word in ["my name", "call me", "name is"]):
+            match = re.search(r"(?:my name is|call me|my name|people call me)\s+([a-zA-Z]+)", user_clean.replace("!", "").replace(".", "").replace("?", ""), re.IGNORECASE)
             if match:
                 name = match.group(1).capitalize()
                 str_name = f" {name}"
@@ -132,6 +141,7 @@ try:
             }
             ai_main = options.get(ai_nums, f"Yes it is{name_str}!")
             default = True
+
         if Error:
             ai_response = "Please try rephrasing your question."
         else:
@@ -142,22 +152,25 @@ try:
                     ai_response = f"{name} {ai_main}" if name else ai_main
             else:
                 ai_response = ai_intro
+
         if name:
             with open("name.py", "w") as file:
                 file.write(name)
-            name = f"{name}: "
+            name_label = f"{name}: "
         else:
-            name = "User: "
+            name_label = "User: "
+
         st.write(f"---Chatting-With-{ai_name}---")
         if history:
             st.write(history)
-        st.write(f"{name}{user}")
+
+        st.write(f"{name_label}{user}")
         st.write_stream(stream_response(ai_name + ": " + ai_response))
-        history = (f"""{history}
-{name}{user}
-{ai_name}: {ai_response}""")
+
+        history = f"{history}\n{name_label}{user}\n{ai_name}: {ai_response}"
         with open("history.py", "w") as fil:
             fil.write(history)
+
 except Exception as e:
     st.title("An Error occured.")
     st.write(e)
