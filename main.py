@@ -51,15 +51,6 @@ try:
     
         # Check for prompt commands safely
         user_clean = user.lower().replace("'", "")
-        if any(word in user_clean for word in ["my name", "i am", "name is"]):
-            match = re.search(r"(?:my name is|i am|call me|my name|hello|people call me|well|s)\s+([a-zA-Z]+)", user_clean.replace("!", "").replace(".", "").replace("?", ""), re.IGNORECASE)
-            if match:
-                name = match.group(1).capitalize()
-                str_name = f" {name}"
-            name_str = f" {name}" if name else ""
-            ai_main = f"Nice to meet you{str_name}! How are you today?"
-            default = True
-        
         if "what can you do" in user_clean:
             ai_main = "I can answer questions, inform you on things, and research stuff for you!"
             default = True
@@ -120,6 +111,14 @@ try:
             elif "died" in user_clean:
                 ai_main = f"I am so sorry for your loss{name_str}."
                 default = True
+        if any(word in user_clean for word in ["my name", "i am", "name is"]):
+            match = re.search(r"(?:my name is|i am|call me|my name|hello|people call me|well|s)\s+([a-zA-Z]+)", user_clean.replace("!", "").replace(".", "").replace("?", ""), re.IGNORECASE)
+            if match:
+                name = match.group(1).capitalize()
+                str_name = f" {name}"
+            name_str = f" {name}" if name else ""
+            ai_main = f"Nice to meet you{str_name}! How are you today?"
+            default = True
         elif any(word in user_clean for word in ["thats", "nice", "cool"]):
             name_str = f" {name}" if name else ""
             options = {
