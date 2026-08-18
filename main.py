@@ -171,7 +171,7 @@ try:
             st.text(history)
 
         st.write(f"{name_label}{user}")
-        st.text_stream(stream_response(ai_name + ": " + ai_response))
+        st.write_stream(stream_response(ai_name + ": " + ai_response))
         ai_exiting1 = f"{ai_name}: {ai_response}"
         ai_exiting2 = f"{name_label}{user}"
         history = f"{history}\n{ai_exiting2}\n{ai_exiting1}"
