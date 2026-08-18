@@ -162,13 +162,13 @@ try:
 
         st.write(f"---Chatting-With-{ai_name}---")
         if history:
-            exec(f"st.write({history})")
+            st.text(history)
 
         st.write(f"{name_label}{user}")
         st.write_stream(stream_response(ai_name + ": " + ai_response))
         ai_exiting1 = f"{ai_name}: {ai_response}"
         ai_exiting2 = f"{name_label}{user}"
-        history = f"{history}\\n{ai_exiting2}\\n{ai_exiting1}"
+        history = f"{history}\n{ai_exiting2}\n{ai_exiting1}"
         with open("history.py", "w") as fil:
             fil.write(history)
 
