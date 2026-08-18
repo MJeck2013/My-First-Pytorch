@@ -162,7 +162,7 @@ try:
 
         st.write(f"---Chatting-With-{ai_name}---")
         if history:
-            st.write(history)
+            exec(f"st.write({history})")
 
         st.write(f"{name_label}{user}")
         st.write_stream(stream_response(ai_name + ": " + ai_response))
