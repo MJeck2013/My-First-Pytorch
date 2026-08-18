@@ -30,7 +30,7 @@ def ai():
 
 while True:
     user = st.chat_input(f"Talk to {ai_name}: ")
-    if user_input:
+    if user:
         default = False
         ai_nums = ai()
         
