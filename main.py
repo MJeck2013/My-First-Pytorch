@@ -1,9 +1,10 @@
+import streamlit as st
 try:
+    import ast
     import os
     import re
     import torch as t
     import time
-    import streamlit as st
     
     def stream_response(text, delay=0.03):
         for word in text.split(" "):
@@ -29,12 +30,12 @@ try:
             if ai_num in [1, 2, 3]:
                 break
         return ai_num
-    user = st.chat_input(f"Talk to {ai_name}: ")
+    st.title(f"Chat with {ai_name}")
+    user = st.chat_input(f"Talk to {ai_name}")
     if user:
         default = False
         Error = False
         ai_nums = ai()
-        
         ai_intro = str(ai_nums).replace("1", "Hi!").replace("2", "Hello!").replace("3", "key1")
         name = ""
         if os.path.exists("name.py"):
@@ -49,7 +50,13 @@ try:
     
         # Check for prompt commands safely
         user_clean = user.lower().replace("'", "")
-        
+        if any(word in user_clean for word in ["my name", "i am", "name is"]):
+            match = re.search(r"(?:my name is|i am|call me|my name|hello|people call me|well)\s+([a-zA-Z]+)", user_clean, re.IGNORECASE)
+            if match:
+                name = match.group(1).capitalize()
+                str_name = f" {name}"
+            ai_main = f"Nice to meet you{str_name}! How are you today?"
+            default = True
         if "what can you do" in user_clean:
             ai_main = "I can answer questions, inform you on things, and research stuff for you!"
             default = True
@@ -64,7 +71,7 @@ try:
             default = True
         elif any(word in user_clean for word in ["what is", "divided by", "whats the answer to", "solve this equation", "can you solve this"]):
             used_text = re.sub(r"[a-zA-Z]", "", user_clean)
-            used_text = used_text.replace("\\", "").replace("\"", "").replace("|", "").replace(".", "").replace(",", "").replace("!", "").replace("?", "")
+            used_text = used_text.replace("\\", "").replace("\"", "").replace("|", "").replace(",", "").replace("!", "").replace("?", "")
             try:
                 node = ast.parse(used_text.strip(), mode='eval')
                 Answer = eval(compile(node, '<string>', 'eval'), {"__builtins__": None}, {})
@@ -104,4 +111,5 @@ try:
                     file.write(name)
         st.write_stream(stream_response(ai_response))
 except Exception as e:
-    print(e)
+    st.title("An Error occured.")
+    st.write(e)
