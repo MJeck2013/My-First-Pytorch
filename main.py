@@ -80,7 +80,7 @@ try:
             }
             ai_main = options.get(ai_nums, f"{name_str} think the answer is {Answer}.")
             default = True
-        elif any(word in user_clean for word in ["im doing", "feeling", "day"]):
+        elif any(word in user_clean for word in ["im doing", "feeling", "day", "i am"]):
             name_str = f" {name}" if name else ""
             if any(word in user_clean for word in ["sad", "mad", "angry", "depressed", "anxiety"]):
                 options = {
@@ -112,7 +112,7 @@ try:
                 ai_main = f"I am so sorry for your loss{name_str}."
                 default = True
         if any(word in user_clean for word in ["my name", "i am", "name is"]):
-            match = re.search(r"(?:my name is|i am|call me|my name|hello|people call me|well|s)\s+([a-zA-Z]+)", user_clean.replace("!", "").replace(".", "").replace("?", ""), re.IGNORECASE)
+            match = re.search(r"(?:my name is|call me|my name|hello|people call me|well|s)\s+([a-zA-Z]+)", user_clean.replace("!", "").replace(".", "").replace("?", ""), re.IGNORECASE)
             if match:
                 name = match.group(1).capitalize()
                 str_name = f" {name}"
