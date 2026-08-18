@@ -51,7 +51,7 @@ try:
         # Check for prompt commands safely
         user_clean = user.lower().replace("'", "")
         if any(word in user_clean for word in ["my name", "i am", "name is"]):
-            match = re.search(r"(?:my name is|i am|call me|my name|hello|people call me|well)\s+([a-zA-Z]+)", user_clean, re.IGNORECASE)
+            match = re.search(r"(?:my name is|i am|call me|my name|hello|people call me|well|s)\s+([a-zA-Z]+)", user_clean.replace("!", "").replace(".", "").replace("?", ""), re.IGNORECASE)
             if match:
                 name = match.group(1).capitalize()
                 str_name = f" {name}"
