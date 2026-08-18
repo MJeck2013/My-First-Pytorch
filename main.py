@@ -168,6 +168,8 @@ try:
 
         st.write(f"---Chatting-With-{ai_name}---")
         if history:
+            if name:
+                history = history.replace("User", name)
             st.text(history)
 
         st.write(f"{name_label}{user}")
