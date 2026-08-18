@@ -99,7 +99,7 @@ try:
                 }
                 ai_main = options.get(ai_nums, f"Its alright things'll get better{name_str}.")
                 default = True
-            elif any(word in user_clean for word in ["happy", "excited", "energetic", "joy", "good", "well", "nice"]):
+            elif any(word in user_clean for word in ["happy", "excited", "energetic", "joy", "good", "well", "nice", "awesome", "amazing"]):
                 options = {
                     1: f"That's great{name_str}!",
                     2: f"Great! I'm happy that you are doing so well today{name_str}!",
@@ -141,7 +141,13 @@ try:
             }
             ai_main = options.get(ai_nums, f"Yes it is{name_str}!")
             default = True
-
+        if "thank you" in user_clean:
+            name_str = f" {name}" if name else ""
+            if ai_main:
+                ai_main = ai_main + f" And your welcome{name_str}!"
+            else:
+                ai_main = ai_intro + f" Your welcome{name_str}!"
+                default = True
         if Error:
             ai_response = "Please try rephrasing your question."
         else:
@@ -165,7 +171,7 @@ try:
             st.text(history)
 
         st.write(f"{name_label}{user}")
-        st.write_stream(stream_response(ai_name + ": " + ai_response))
+        st.text_stream(stream_response(ai_name + ": " + ai_response))
         ai_exiting1 = f"{ai_name}: {ai_response}"
         ai_exiting2 = f"{name_label}{user}"
         history = f"{history}\n{ai_exiting2}\n{ai_exiting1}"
