@@ -102,7 +102,7 @@ try:
             elif any(word in user_clean for word in ["happy", "excited", "energetic", "joy", "good", "well", "nice"]):
                 options = {
                     1: f"That's great{name_str}!",
-                    2: f"I'm happy for you{name_str}!",
+                    2: f"Great! I'm happy for you{name_str}!",
                     3: f"Let's go{name_str}! That's awesome!"
                 }
                 ai_main = options.get(ai_nums, f"Let's go{name_str}! That's awesome!")
@@ -142,6 +142,8 @@ try:
         if name:
             with open("name.py", "w") as file:
                 file.write(name)
+            name = f"{name}: "
+        st.write(f"{name}{user}")
         st.write_stream(stream_response(ai_response))
 except Exception as e:
     st.title("An Error occured.")
