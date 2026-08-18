@@ -56,6 +56,7 @@ try:
             if match:
                 name = match.group(1).capitalize()
                 str_name = f" {name}"
+            name_str = f" {name}" if name else ""
             ai_main = f"Nice to meet you{str_name}! How are you today?"
             default = True
         
@@ -97,13 +98,15 @@ try:
                     3: f"Its alright things'll get better{name_str}."
                 }
                 ai_main = options.get(ai_nums, f"")
-            elif any(word in user_clean for word in ["happy", "excited", "energetic", "joy", "good"]):
+                default = True
+            elif any(word in user_clean for word in ["happy", "excited", "energetic", "joy", "good", "well", "nice"]):
                 options = {
                     1: f"That's great{name_str}!",
                     2: f"I'm happy for you{name_str}!",
                     3: f"Let's go{name_str}! That's awesome!"
                 }
                 ai_main = options.get(ai_nums, f"Let's go{name_str}! That's awesome!")
+                default = True
             elif "birthday" in user_clean and "my" in user_clean:
                 if not name_str:
                     name_str = " user"
@@ -113,10 +116,10 @@ try:
                     3: f"Let's go{name_str}! Happy birthday!"
                 }
                 ai_main = options.get(ai_nums, f"Let's go{name_str}! Happy birthday!")
+                default = True
             elif "died" in user_clean:
                 ai_main = f"I am so sorry for your loss{name_str}."
-            else:
-                Error = True
+                default = True
         elif any(word in user_clean for word in ["thats", "nice", "cool"]):
             name_str = f" {name}" if name else ""
             options = {
