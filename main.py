@@ -41,7 +41,7 @@ try:
         Error = False
         ai_nums = ai()
         ai_intro = str(ai_nums).replace("1", "Hi!").replace("2", "Hello!").replace("3", "key1")
-        name = ""
+        name = """"""
 
         if os.path.exists("name.py"):
             with open("name.py", "r") as file:
