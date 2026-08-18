@@ -84,8 +84,7 @@ while True:
                 ai_response = ai_main
             else:
                 ai_response = f"{name} {ai_main}" if name else ai_main
+        else:
+            ai_response = ai_intro
         with st.chat_message("assistant"):
             st.write_stream(stream_response(ai_response))
-    else:
-        ai_response = ai_intro
-    
