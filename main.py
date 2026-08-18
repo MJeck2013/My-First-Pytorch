@@ -159,7 +159,7 @@ try:
 name + user +
 ai_name + ": " + ai_response)
         with open("history.py", "w") as fil:
-            file.write(history)
+            fil.write(history)
 except Exception as e:
     st.title("An Error occured.")
     st.write(e)
