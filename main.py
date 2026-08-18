@@ -1,4 +1,5 @@
 import os
+import re
 import torch as t
 import time
 import streamlit as st
@@ -59,14 +60,21 @@ if user:
         }
         ai_main = options.get(ai_nums, f"I'm doing great today! Thank you for asking{name_str} :)")
         default = True
-    elif any(word in user_clean for word in ["hello", "im", "bored"]):
-        name_str = f" {name}" if name else ""
+    elif any(word in user_clean for word in ["what is", "divided by", "whats the answer to", "solve this equation", "can you solve this"]):
+        used_text = re.sub(r"[a-zA-Z]", "", user_clean)
+        used_text = used_text.replace("\\", "").replace("\"", "").replace("|", "").replace(".", "").replace(",", "").replace("!", "").replace("?", "")
+        try:
+            exec(f"Answer = {used_text}")
+        except:
+            Error = True
+            Answer = ""
+        name_str = f"{name} i" if name else "I"
         options = {
-            1: f"What can I do for you{name_str}?",
-            2: f"What can I help you with today{name_str}?",
-            3: f"How can I help{name_str}?"
+            1: f"The answer to {used_text} is {Answer}.",
+            2: f"{Answer}.",
+            3: f"{name_str} think the answer is {Answer}."
         }
-        ai_main = options.get(ai_nums, f"How can I help{name_str}?")
+        ai_main = options.get(ai_nums, f"{name_str} think the answer is {Answer}.")
         default = True
     elif any(word in user_clean for word in ["thats", "nice", "cool"]):
         name_str = f" {name}" if name else ""
@@ -77,12 +85,14 @@ if user:
         }
         ai_main = options.get(ai_nums, f"Yes it is{name_str}!")
         default = True
-    if default:
-        if question or (name and (name in ai_main or name in ai_intro)):
-            ai_response = ai_main
-        else:
-            ai_response = f"{name} {ai_main}" if name else ai_main
+    if Error:
+        ai_response = "Please try rephrasing your question."
     else:
-        ai_response = ai_intro
-    with st.chat_message("assistant"):
-        st.write_stream(stream_response(ai_response))
+        if default:
+            if question or (name and (name in ai_main or name in ai_intro)):
+                ai_response = ai_main
+            else:
+                ai_response = f"{name} {ai_main}" if name else ai_main
+        else:
+            ai_response = ai_intro
+    st.write_stream(stream_response(ai_response))
