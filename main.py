@@ -151,13 +151,15 @@ try:
         if history:
             st.write(history)
         else:
-            st.write(f"Chatting with {ai_name}")
             history = f"Chatting with {ai_name}"
+            st.write(history)
         st.write(f"{name}{user}")
         st.write_stream(stream_response(ai_name + ": " + ai_response))
-        history = f"""{history}
-{name}{user}
-{ai_name}: {ai_response}"""
+        history = (history +
+name + user +
+ai_name + ": " + ai_response)
+        with open("history.py", "w") as fil:
+            file.write(history)
 except Exception as e:
     st.title("An Error occured.")
     st.write(e)
