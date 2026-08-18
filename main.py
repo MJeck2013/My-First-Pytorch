@@ -166,8 +166,9 @@ try:
 
         st.write(f"{name_label}{user}")
         st.write_stream(stream_response(ai_name + ": " + ai_response))
-
-        history = f"{history}\n{name_label}{user}\n{ai_name}: {ai_response}"
+        ai_exiting1 = f"{ai_name}: {ai_response}"
+        ai_exiting2 = f"{name_label}{user}"
+        history = f"{history}\n{ai_exiting2}\n{ai_exiting1}"
         with open("history.py", "w") as fil:
             fil.write(history)
 
