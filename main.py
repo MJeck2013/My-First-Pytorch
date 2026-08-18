@@ -1,5 +1,6 @@
 import streamlit as st
 try:
+    import math
     import ast
     import os
     import re
@@ -57,6 +58,7 @@ try:
                 str_name = f" {name}"
             ai_main = f"Nice to meet you{str_name}! How are you today?"
             default = True
+        
         if "what can you do" in user_clean:
             ai_main = "I can answer questions, inform you on things, and research stuff for you!"
             default = True
@@ -69,12 +71,12 @@ try:
             }
             ai_main = options.get(ai_nums, f"I'm doing great today! Thank you for asking{name_str} :)")
             default = True
-        elif any(word in user_clean for word in ["what is", "divided by", "whats the answer to", "solve this equation", "can you solve this"]):
-            used_text = re.sub(r"[a-zA-Z]", "", user_clean)
+        elif any(word in user_clean for word in ["what is", "divided by", "whats the answer to", "solve this equation", "can you solve this", "answer to"]):
+            used_text = re.sub(r"[a-zA-Z]", "", user_clean.replace("plus", "+").replace("minus", "-").replace("subtract", "-").replace("times", "*").replace("power", "**").replace("divide", "/").replace("pi", "math.pi"))
             used_text = used_text.replace("\\", "").replace("\"", "").replace("|", "").replace(",", "").replace("!", "").replace("?", "")
             try:
                 node = ast.parse(used_text.strip(), mode='eval')
-                Answer = eval(compile(node, '<string>', 'eval'), {"__builtins__": None}, {})
+                Answer = eval(compile(node, '<string>', 'eval'), {"__builtins__": None, "math": math}, {})
             except:
                 Error = True
                 Answer = ""
@@ -86,6 +88,35 @@ try:
             }
             ai_main = options.get(ai_nums, f"{name_str} think the answer is {Answer}.")
             default = True
+        elif any(word in user_clean for word in ["im doing", "feeling", "day"]):
+            name_str = f" {name}" if name else ""
+            if any(word in user_clean for word in ["sad", "mad", "angry", "depressed", "anxiety"]):
+                options = {
+                    1: f"That must suck doesn't it{name_str}. I'm sorry :(",
+                    2: f"I feel bad for you just know you got someone in your corner{name_str}.",
+                    3: f"Its alright things'll get better{name_str}."
+                }
+                ai_main = options.get(ai_nums, f"")
+            elif any(word in user_clean for word in ["happy", "excited", "energetic", "joy", "good"]):
+                options = {
+                    1: f"That's great{name_str}!",
+                    2: f"I'm happy for you{name_str}!",
+                    3: f"Let's go{name_str}! That's awesome!"
+                }
+                ai_main = options.get(ai_nums, f"Let's go{name_str}! That's awesome!")
+            elif "birthday" in user_clean and "my" in user_clean:
+                if not name_str:
+                    name_str = " user"
+                options = {
+                    1: f"Happy Birthday{name_str}!",
+                    2: f"Happy birthday to you, happy birthday to you, Happy birthday to{name_str}, Happy birth day to you!",
+                    3: f"Let's go{name_str}! Happy birthday!"
+                }
+                ai_main = options.get(ai_nums, f"Let's go{name_str}! Happy birthday!")
+            elif "died" in user_clean:
+                ai_main = f"I am so sorry for your loss{name_str}."
+            else:
+                Error = True
         elif any(word in user_clean for word in ["thats", "nice", "cool"]):
             name_str = f" {name}" if name else ""
             options = {
@@ -106,9 +137,8 @@ try:
             else:
                 ai_response = ai_intro
         if name:
-            if os.path.exists("name.py"):
-                with open("name.py", "w") as file:
-                    file.write(name)
+            with open("name.py", "w") as file:
+                file.write(name)
         st.write_stream(stream_response(ai_response))
 except Exception as e:
     st.title("An Error occured.")
