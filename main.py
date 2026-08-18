@@ -42,6 +42,8 @@ try:
         if os.path.exists("name.py"):
             with open("name.py", "r") as file:
                 name = file.read().strip()
+        with open("history.py", "r") as f:
+            history = f.read()
     
         if ai_intro == "key1":
             ai_intro = f"Hello {name}!" if name else "Hello!"
@@ -93,7 +95,7 @@ try:
             elif any(word in user_clean for word in ["happy", "excited", "energetic", "joy", "good", "well", "nice"]):
                 options = {
                     1: f"That's great{name_str}!",
-                    2: f"Great! I'm happy for you{name_str}!",
+                    2: f"Great! I'm happy that you are doing so well today{name_str}!",
                     3: f"Let's go{name_str}! That's awesome!"
                 }
                 ai_main = options.get(ai_nums, f"Let's go{name_str}! That's awesome!")
@@ -111,6 +113,8 @@ try:
             elif "died" in user_clean:
                 ai_main = f"I am so sorry for your loss{name_str}."
                 default = True
+            if any(word in user_clean for word in ["how about you", "how are you", "you doing", "how about you"]):
+                    ai_main = ai_main + " And I am doing well today, thank you for asking!"
         if any(word in user_clean for word in ["my name", "i am", "name is"]):
             match = re.search(r"(?:my name is|call me|my name|hello|people call me|well|s)\s+([a-zA-Z]+)", user_clean.replace("!", "").replace(".", "").replace("?", ""), re.IGNORECASE)
             if match:
@@ -144,8 +148,16 @@ try:
             name = f"{name}: "
         else:
             name = "User: "
+        if history:
+            st.write(history)
+        else:
+            st.write(f"Chatting with {ai_name}")
+            history = f"Chatting with {ai_name}"
         st.write(f"{name}{user}")
         st.write_stream(stream_response(ai_name + ": " + ai_response))
+        history = f"""{history}
+{name}{user}
+{ai_name}: {ai_response}"""
 except Exception as e:
     st.title("An Error occured.")
     st.write(e)
