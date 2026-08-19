@@ -8,6 +8,7 @@ try:
     import time
     import requests
     import torch as t
+    from duckduckgo_search import DDGS
     from bs4 import BeautifulSoup
     from ddgs import DDGS
 
@@ -234,12 +235,11 @@ try:
                 ai_main += f" My name is {ai_name}!"
             else:
                 ai_main = f" My name is {ai_name}!"
-                default = True  # Fixed typo: defualt -> default
+                default = True  
             if any(word in history for word in ["your name", "what is your name", "whats your name"]):
                 sad += 6.2
             else:
                 sad -= 4.5
-
         if Error:
             ai_response = "Please try rephrasing your question."
         else:
@@ -249,8 +249,28 @@ try:
                 else:
                     ai_response = f"{name} {ai_main}" if name else ai_main
             else:
-                data = gather_web_data(user, min_sentences=1, max_sentences=3)
-                ai_response = f"Here's some information from the web: {data}" if data else "I couldn't find any information on that."
+                if "/web " in user:
+                    user = user.replace("/web ", "").replace("print(", "st.write(")
+                    data = gather_web_data(user, min_sentences=1, max_sentences=5)
+                    ai_response = f"Here's some information from the web: {data}" if data else "I couldn't find any information on that."
+                elif "/python " in user:
+                    user = user.replace("/python ", "").replace("python(", "st.write(")
+                    if any(word in history for word in ["text", "delay", "query", "min_sentences", "max_sentences", "ai_name", "history", "user", "sad", "user_clean", "ai_response"]):
+                        ai_response = "I can't help with that sorry."
+                    else:
+                        try:
+                            exec(user)
+                            ai_response = f"Successfully executed code: {user}"
+                            sad -= 0.5
+                        except Exception as e:
+                            ai_response = f"Error while executing: {user} {e}"
+                            sad += 0.5
+                elif user == "/help":
+                    ai_response = f"There are many commands you can use while chatting with {ai_name}. The first command is /web you use /web when you want assistant to search the web for a result for example if you want it to search the web for \"How do Solar Panels work?\" you would type \"/web How do Solar Panels work?\". It's very simple! now if you want to execute a line of python code you instead use \"/python\" so if you want it to say Hi all you do is type in \"/python print(\"Hi\")\""
+                else:
+                    ai_response = ai_intro
+        if not history:
+            st.text("type in /help for more information")
 
         if name:
             with open("name.py", "w") as file:
