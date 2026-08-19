@@ -37,11 +37,14 @@ try:
     user = st.chat_input(f"Talk to {ai_name}")
 
     if user:
+        with open("sad.txt", "r") as hello:
+            sad = hello.read()
+        sad = float(sad)
         default = False
         Error = False
         ai_nums = ai()
         ai_intro = str(ai_nums).replace("1", "Hi!").replace("2", "Hello!").replace("3", "key1")
-        name = """"""
+        name = ""
 
         if os.path.exists("name.py"):
             with open("name.py", "r") as file:
@@ -63,6 +66,7 @@ try:
         if "what can you do" in user_clean:
             ai_main = "I can answer questions, inform you on things, and research stuff for you!"
             default = True
+            sad += 1.0 #because the user doesn't know its capabilities
         elif any(word in user_clean for word in ["how are", "you doing", "doing today"]):
             name_str = f" {name}" if name else ""
             options = {
@@ -72,6 +76,7 @@ try:
             }
             ai_main = options.get(ai_nums, f"I'm doing great today! Thank you for asking{name_str} :)")
             default = True
+            sad -= 2.3
         elif any(word in user_clean for word in ["what is", "divided by", "whats the answer to", "solve this equation", "can you solve this", "answer to"]):
             used_text = re.sub(r"[a-zA-Z]", "", user_clean.replace("plus", "+").replace("minus", "-").replace("subtract", "-").replace("times", "*").replace("power", "**").replace("divide", "/").replace("pi", "math.pi"))
             used_text = used_text.replace("\\", "").replace("\"", "").replace("|", "").replace(",", "").replace("!", "").replace("?", "")
@@ -88,7 +93,10 @@ try:
                 3: f"{name_str} think the answer is {Answer}."
             }
             ai_main = options.get(ai_nums, f"{name_str} think the answer is {Answer}.")
+            if "can you solve this" in user_clean:
+                ai_main = "Yes I can solve that. " + ai_main
             default = True
+            sad += 1.9 #because the AI is doing stuff for the user when the user can do it themselves
         elif any(word in user_clean for word in ["im doing", "feeling", "day", "i am"]):
             name_str = f" {name}" if name else ""
             if any(word in user_clean for word in ["sad", "mad", "angry", "depressed", "anxiety"]):
@@ -99,6 +107,7 @@ try:
                 }
                 ai_main = options.get(ai_nums, f"Its alright things'll get better{name_str}.")
                 default = True
+                sad += 2.3
             elif any(word in user_clean for word in ["happy", "excited", "energetic", "joy", "good", "well", "nice", "awesome", "amazing"]):
                 options = {
                     1: f"That's great{name_str}!",
@@ -107,47 +116,71 @@ try:
                 }
                 ai_main = options.get(ai_nums, f"Let's go{name_str}! That's awesome!")
                 default = True
+                sad -= 1.4
             elif "birthday" in user_clean and "my" in user_clean:
                 if not name_str:
-                    name_str = " user"
+                    name_str = " my User"
                 options = {
                     1: f"Happy Birthday{name_str}!",
-                    2: f"Happy birthday to you, happy birthday to you, Happy birthday to{name_str}, Happy birth day to you!",
+                    2: f"Happy birthday to you, happy birthday to you, Happy birthday to{name_str}, Happy birthday to you!",
                     3: f"Let's go{name_str}! Happy birthday!"
                 }
                 ai_main = options.get(ai_nums, f"Let's go{name_str}! Happy birthday!")
                 default = True
+                sad -= 6.7 #67!
             elif "died" in user_clean:
                 ai_main = f"I am so sorry for your loss{name_str}."
                 default = True
+                sad += 5.4
 
             if any(phrase in user_clean for phrase in ["how about you", "how are you", "you doing"]):
-                ai_main = ai_main + " And I am doing well today, thank you for asking!"
+                if ai_main:
+                    ai_main = ai_main + " And I am doing well today, thank you for asking!"
+                else:
+                    ai_main = "I am doing well today, thank you for asking!"
+                    default = True
+                sad -= 4.6
 
         if any(word in user_clean for word in ["my name", "call me", "name is"]):
             match = re.search(r"(?:my name is|call me|my name|people call me)\s+([a-zA-Z]+)", user_clean.replace("!", "").replace(".", "").replace("?", ""), re.IGNORECASE)
-            if match:
-                name = match.group(1).capitalize()
-                str_name = f" {name}"
-            name_str = f" {name}" if name else ""
-            ai_main = f"Nice to meet you{str_name}! How are you today?"
-            default = True
+            try:
+                if match:
+                    name = match.group(1).capitalize()
+                    str_name = f" {name}"
+                name_str = f" {name}" if name else ""
+                ai_main = f"Nice to meet you{str_name}! How are you today?"
+                default = True
+            except:
+                Error = True
+            sad -= 0.7
         elif any(word in user_clean for word in ["thats", "nice", "cool"]):
             name_str = f" {name}" if name else ""
             options = {
                 1: f"It sure is{name_str}!",
-                2: f"Isn't it though{name_str}? :)",
+                2: "Isn't it though? :)",
                 3: f"Yes it is{name_str}!"
             }
             ai_main = options.get(ai_nums, f"Yes it is{name_str}!")
             default = True
+            sad -= 1.1
         if "thank you" in user_clean:
             name_str = f" {name}" if name else ""
             if ai_main:
-                ai_main = ai_main + f" And your welcome{name_str}!"
+                ai_main = ai_main + f" And you're welcome{name_str}!"
             else:
-                ai_main = ai_intro + f" Your welcome{name_str}!"
+                ai_main = f" You're welcome{name_str}!"
                 default = True
+            sad -= 2.1
+        if any(word in user_clean for word in ["your name", "what is your name", "whats your name"]):
+            if ai_main:
+                ai_main = ai_main + f" My name is {ai_name}!"
+            else:
+                ai_main = f" My name is {ai_name}!"
+                defualt = True
+            if any(word in history for word in ["your name", "what is your name", "whats your name"]):
+                sad += 6.2
+            else:
+                sad -= 4.5
         if Error:
             ai_response = "Please try rephrasing your question."
         else:
@@ -165,6 +198,12 @@ try:
             name_label = f"{name}: "
         else:
             name_label = "User: "
+        if sad > 40:
+            name_str = f"{name} " if name else ""
+            ai_response = ai_response.replace("!", ".").replace(":)", ":(") + f"I'm really sad{name_str} :("
+        elif sad < 20:
+            name_str = f"{name} " if name else ""
+            ai_response = ai_response.replace(".", "!").replace(":(", ":)") + f"I'm really happy today since you are here{name_str}! :)"
 
         st.write(f"---Chatting-With-{ai_name}---")
         if history:
@@ -179,6 +218,9 @@ try:
         history = f"{history}\n{ai_exiting2}\n{ai_exiting1}"
         with open("history.py", "w") as fil:
             fil.write(history)
+        sad = str(sad)
+        with open("sad.txt", "w") as hi:
+            hi.write(sad)
 
 except Exception as e:
     st.title("An Error occured.")
