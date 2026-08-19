@@ -1,2 +1,5 @@
-torch
 streamlit
+ddgs
+requests
+beautifulsoup4
+torch
