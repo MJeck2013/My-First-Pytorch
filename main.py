@@ -5,9 +5,57 @@ try:
     import ast
     import os
     import re
-    import torch as t
     import time
-    
+    import requests
+    import torch as t
+    from bs4 import BeautifulSoup
+    from ddgs import DDGS
+
+    # --- File Initialization Helpers ---
+    if not os.path.exists("sad.txt"):
+        with open("sad.txt", "w") as f:
+            f.write("30.0")
+
+    if not os.path.exists("history.py"):
+        with open("history.py", "w") as f:
+            f.write("")
+
+    def extract_sentences(text):
+        if not text.strip():
+            return []
+        return [s.strip() for s in re.split(r'(?<=[.!?])\s+', text.strip()) if s.strip()]
+
+    def gather_web_data(query, min_sentences=1, max_sentences=3):
+        all_sentences = []
+        try:
+            results = list(DDGS().text(query, max_results=8))
+            for result in results:
+                snippet = result.get('body', '')
+                url = result.get('href')
+                
+                if snippet:
+                    all_sentences.extend(extract_sentences(snippet))
+                
+                if len(all_sentences) < min_sentences and url:
+                    try:
+                        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                        response = requests.get(url, headers=headers, timeout=5)
+                        if response.status_code == 200:
+                            soup = BeautifulSoup(response.text, 'html.parser')
+                            paragraphs = [p.get_text().strip() for p in soup.find_all('p') if p.get_text().strip()]
+                            full_page_text = " ".join(paragraphs)
+                            all_sentences.extend(extract_sentences(full_page_text))
+                    except Exception as err:
+                        print(f"Failed to load {url}: {err}")
+                        
+                if len(all_sentences) >= min_sentences:
+                    break
+        except Exception as e:
+            print(f"Search failed: {e}")
+
+        final_sentences = all_sentences[:max_sentences]
+        return " ".join(final_sentences)
+
     def stream_response(text, delay=0.03):
         for word in text.split(" "):
             yield word + " "
@@ -34,12 +82,20 @@ try:
         return ai_num
 
     st.title(f"Chat with {ai_name}")
+
+    # Display prior conversation history if it exists
+    if os.path.exists("history.py"):
+        with open("history.py", "r") as f:
+            history_content = f.read()
+            if history_content.strip():
+                st.text(history_content)
+
     user = st.chat_input(f"Talk to {ai_name}")
 
     if user:
         with open("sad.txt", "r") as hello:
-            sad = hello.read()
-        sad = float(sad)
+            sad = float(hello.read().strip())
+            
         default = False
         Error = False
         ai_nums = ai()
@@ -60,13 +116,12 @@ try:
     
         question = "?" in user
         ai_main = ""
-    
         user_clean = user.lower().replace("'", "")
 
         if "what can you do" in user_clean:
             ai_main = "I can answer questions, inform you on things, and research stuff for you!"
             default = True
-            sad += 1.0 #because the user doesn't know its capabilities
+            sad += 1.0
         elif any(word in user_clean for word in ["how are", "you doing", "doing today"]):
             name_str = f" {name}" if name else ""
             options = {
@@ -96,7 +151,7 @@ try:
             if "can you solve this" in user_clean:
                 ai_main = "Yes I can solve that. " + ai_main
             default = True
-            sad += 1.9 #because the AI is doing stuff for the user when the user can do it themselves
+            sad += 1.9
         elif any(word in user_clean for word in ["im doing", "feeling", "day", "i am"]):
             name_str = f" {name}" if name else ""
             if any(word in user_clean for word in ["sad", "mad", "angry", "depressed", "anxiety"]):
@@ -127,7 +182,7 @@ try:
                 }
                 ai_main = options.get(ai_nums, f"Let's go{name_str}! Happy birthday!")
                 default = True
-                sad -= 6.7 #67!
+                sad -= 6.7
             elif "died" in user_clean:
                 ai_main = f"I am so sorry for your loss{name_str}."
                 default = True
@@ -135,7 +190,7 @@ try:
 
             if any(phrase in user_clean for phrase in ["how about you", "how are you", "you doing"]):
                 if ai_main:
-                    ai_main = ai_main + " And I am doing well today, thank you for asking!"
+                    ai_main += " And I am doing well today, thank you for asking!"
                 else:
                     ai_main = "I am doing well today, thank you for asking!"
                     default = True
@@ -147,7 +202,8 @@ try:
                 if match:
                     name = match.group(1).capitalize()
                     str_name = f" {name}"
-                name_str = f" {name}" if name else ""
+                else:
+                    str_name = ""
                 ai_main = f"Nice to meet you{str_name}! How are you today?"
                 default = True
             except:
@@ -163,24 +219,27 @@ try:
             ai_main = options.get(ai_nums, f"Yes it is{name_str}!")
             default = True
             sad -= 1.1
+
         if "thank you" in user_clean:
             name_str = f" {name}" if name else ""
             if ai_main:
-                ai_main = ai_main + f" And you're welcome{name_str}!"
+                ai_main += f" And you're welcome{name_str}!"
             else:
                 ai_main = f" You're welcome{name_str}!"
                 default = True
             sad -= 2.1
+
         if any(word in user_clean for word in ["your name", "what is your name", "whats your name"]):
             if ai_main:
-                ai_main = ai_main + f" My name is {ai_name}!"
+                ai_main += f" My name is {ai_name}!"
             else:
                 ai_main = f" My name is {ai_name}!"
-                defualt = True
+                default = True  # Fixed typo: defualt -> default
             if any(word in history for word in ["your name", "what is your name", "whats your name"]):
                 sad += 6.2
             else:
                 sad -= 4.5
+
         if Error:
             ai_response = "Please try rephrasing your question."
         else:
@@ -190,7 +249,8 @@ try:
                 else:
                     ai_response = f"{name} {ai_main}" if name else ai_main
             else:
-                ai_response = ai_intro
+                data = gather_web_data(user, min_sentences=1, max_sentences=3)
+                ai_response = f"Here's some information from the web: {data}" if data else "I couldn't find any information on that."
 
         if name:
             with open("name.py", "w") as file:
@@ -199,29 +259,26 @@ try:
         else:
             name_label = "User: "
         if sad > 33:
-            name_str = f"{name} " if name else ""
-            ai_response = ai_response.replace("!", ".").replace(":)", ":(") + f"I'm really sad{name_str} :("
+            name_str = f" {name}" if name else ""
+            ai_response += f" I'm really sad{name_str} :("
         elif sad < 27:
-            name_str = f"{name} " if name else ""
-            ai_response = ai_response.replace(".", "!").replace(":(", ":)") + f"I'm really happy today since you are here{name_str}! :)"
+            name_str = f" {name}" if name else ""
+            ai_response += f" I'm really happy today since you are here{name_str}! :)"
 
-        st.write(f"---Chatting-With-{ai_name}---")
-        if history:
-            if name:
-                history = history.replace("User", name)
-            st.text(history)
-
+        # Display Chat Output
         st.write(f"{name_label}{user}")
-        st.write_stream(stream_response(ai_name + ": " + ai_response))
+        st.write_stream(stream_response(f"{ai_name}: {ai_response}"))
+
+        # Persist conversation
         ai_exiting1 = f"{ai_name}: {ai_response}"
         ai_exiting2 = f"{name_label}{user}"
         history = f"{history}\n{ai_exiting2}\n{ai_exiting1}"
         with open("history.py", "w") as fil:
             fil.write(history)
-        sad = str(sad)
+
         with open("sad.txt", "w") as hi:
-            hi.write(sad)
+            hi.write(str(sad))
 
 except Exception as e:
-    st.title("An Error occured.")
+    st.title("An Error occurred.")
     st.write(e)
