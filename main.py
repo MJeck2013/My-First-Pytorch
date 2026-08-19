@@ -211,7 +211,8 @@ try:
             sad -= 0.7
         if any(word in user_clean for word in ["what is", "what was", "tell me about"]):
             data = gather_web_data(user, min_sentences=5, max_sentences=20)
-            ai_response = f"Here's some information from the web: {data}" if data else "I couldn't find any information on that."
+            ai_main = f"Here's some information from the web: {data}" if data else "I couldn't find any information on that."
+            default = True
         elif any(word in user_clean for word in ["thats", "nice", "cool"]):
             name_str = f" {name}" if name else ""
             options = {
