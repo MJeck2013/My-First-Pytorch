@@ -198,10 +198,10 @@ try:
             name_label = f"{name}: "
         else:
             name_label = "User: "
-        if sad > 40:
+        if sad > 33:
             name_str = f"{name} " if name else ""
             ai_response = ai_response.replace("!", ".").replace(":)", ":(") + f"I'm really sad{name_str} :("
-        elif sad < 20:
+        elif sad < 27:
             name_str = f"{name} " if name else ""
             ai_response = ai_response.replace(".", "!").replace(":(", ":)") + f"I'm really happy today since you are here{name_str}! :)"
 
