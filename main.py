@@ -209,7 +209,7 @@ try:
             except:
                 Error = True
             sad -= 0.7
-        if any(word in user_clean for word in ["what is", "what was", "tell me about", "how was", "tell me", "what does", "if"]):
+        if any(word in user_clean for word in ["how", "tell me", "what", "if", "who", "does", "dont"]):
             data = gather_web_data(user, min_sentences=5, max_sentences=20)
             ai_main = f"Here's some information from the web: {data}" if data else "I couldn't find any information on that."
             default = True
