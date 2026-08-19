@@ -8,7 +8,6 @@ try:
     import time
     import requests
     import torch as t
-    from duckduckgo_search import DDGS
     from bs4 import BeautifulSoup
     from ddgs import DDGS
 
