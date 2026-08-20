@@ -15,7 +15,7 @@ try:
     if not os.path.exists("sad.txt"):
         with open("sad.txt", "w") as f:
             f.write("30.0")
-"hi"
+    "hi"
     if not os.path.exists("history.py"):
         with open("history.py", "w") as f:
             f.write("")
